@@ -144,8 +144,8 @@ func (p *Process) runtimeType2Type(a core.Address, d core.Address) *Type {
 	}
 
 	// Read runtime._type.size
-	r := region{p: p, a: a, typ: p.findType("runtime._type")}
-	size := int64(r.Field("size").Uintptr())
+	r := region{p: p, a: a, typ: p.findType("abi.Type")}
+	size := int64(r.Field("Size_").Uintptr())
 
 	// Find module this type is in.
 	var m *module
@@ -159,12 +159,12 @@ func (p *Process) runtimeType2Type(a core.Address, d core.Address) *Type {
 	// Read information out of the runtime._type.
 	var name string
 	if m != nil {
-		x := m.types.Add(int64(r.Field("str").Int32()))
+		x := m.types.Add(int64(r.Field("Str").Int32()))
 		i, n := readNameLen(p, x)
 		b := make([]byte, n)
 		p.proc.ReadAt(b, x.Add(i+1))
 		name = string(b)
-		if r.Field("tflag").Uint8()&uint8(p.rtConstants["tflagExtraStar"]) != 0 {
+		if r.Field("TFlag").Uint8()&uint8(p.rtConstants["tflagExtraStar"]) != 0 {
 			name = name[1:]
 		}
 	} else {
@@ -176,10 +176,10 @@ func (p *Process) runtimeType2Type(a core.Address, d core.Address) *Type {
 
 	// Read ptr/nonptr bits
 	ptrSize := p.proc.PtrSize()
-	nptrs := int64(r.Field("ptrdata").Uintptr()) / ptrSize
+	nptrs := int64(r.Field("PtrBytes").Uintptr()) / ptrSize
 	var ptrs []int64
-	if r.Field("kind").Uint8()&uint8(p.rtConstants["kindGCProg"]) == 0 {
-		gcdata := r.Field("gcdata").Address()
+	if r.Field("Kind_").Uint8()&uint8(p.rtConstants["kindGCProg"]) == 0 {
+		gcdata := r.Field("GCData").Address()
 		for i := int64(0); i < nptrs; i++ {
 			if p.proc.ReadUint8(gcdata.Add(i/8))>>uint(i%8)&1 != 0 {
 				ptrs = append(ptrs, i*ptrSize)
@@ -598,8 +598,8 @@ func extractTypeFromFunctionName(method string, p *Process) *Type {
 
 // ifaceIndir reports whether t is stored indirectly in an interface value.
 func ifaceIndir(t core.Address, p *Process) bool {
-	typr := region{p: p, a: t, typ: p.findType("runtime._type")}
-	if typr.Field("kind").Uint8()&uint8(p.rtConstants["kindDirectIface"]) == 0 {
+	typr := region{p: p, a: t, typ: p.findType("abi.Type")}
+	if typr.Field("Kind_").Uint8()&uint8(p.rtConstants["kindDirectIface"]) == 0 {
 		return true
 	}
 	return false

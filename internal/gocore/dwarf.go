@@ -170,6 +170,15 @@ func (p *Process) readDWARFTypes() {
 		p.runtimeNameMap[name] = append(p.runtimeNameMap[name], t)
 	}
 
+	// In Go 1.20+, _type is an alias for abi.Type.
+	if _, found := p.runtimeNameMap["runtime._type"]; !found {
+		if ts, found := p.runtimeNameMap["abi.Type"]; !found {
+			panic("cannot find runtime._type or abi.Type")
+		} else {
+			p.runtimeNameMap["runtime._type"] = ts
+		}
+	}
+
 	// Construct the runtime.specialfinalizer type.  It won't be found
 	// in DWARF before 1.10 because it does not appear in the type of any variable.
 	// type specialfinalizer struct {
