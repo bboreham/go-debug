@@ -388,7 +388,7 @@ func (p *Process) readRuntimeConstants() {
 	m["_Gwaiting"] = 4
 	m["_Gdead"] = 6
 	m["_Gscan"] = 0x1000
-	m["_PCDATA_StackMapIndex"] = 0
+	m["_PCDATA_StackMapIndex"] = 1 // Changed in CL 171760, 2019
 	m["_FUNCDATA_LocalsPointerMaps"] = 1
 	m["_FUNCDATA_ArgsPointerMaps"] = 0
 	m["tflagExtraStar"] = 1 << 1
