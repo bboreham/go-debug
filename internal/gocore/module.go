@@ -126,7 +126,8 @@ func (m *module) readFunc(r region, pctab region, funcnametab region) *Func {
 		f.pcdata = append(f.pcdata, r.p.proc.ReadInt32(a))
 		a = a.Add(4)
 	}
-	a = a.Align(r.p.proc.PtrSize())
+	// bboreham: I don't see in the docs why this is required, and it breaks for me on Go 1.21.
+	//a = a.Align(r.p.proc.PtrSize())
 
 	if nfd.typ.Size == 1 { // go 1.12 and beyond, this is a uint8
 		n = uint32(nfd.Uint8())
